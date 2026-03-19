@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id String @id @default(uuid(7))
+  fullName String @db.VarChar(100) @map("full_name")
+  email String @unique @db.VarChar(100)
+  phone String? @db.VarChar(100)
+  country Country @relation(fields: [countryId], references: [id])
+  countryId String
+  role UserRole @default(USER)
+  deletedAt DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+  
+  propertyBookings PropertyBooking[]
+  otp UserOTP?
+}
+
+model UserOTP { 
+  id String @id @default(uuid(7))
+  code String @db.VarChar(6)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id") @unique()
+}
+
+model Property {
+  id String @id @default(uuid(7))
+  title String
+  status PropertyStatus
+  description String?
+  // cents
+  price Int
+  country Country @relation(fields: [countryId], references: [id])
+  countryId String
+  city String @db.VarChar(100)
+  address String @db.VarChar(100)
+  mainImage String @db.VarChar(100) @map("main_image")
+  images String[] @db.VarChar(100)
+  bookings PropertyBooking[]
+  deletedAt DateTime? @map("deleted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+}
+
+model PropertyBooking {
+  id String @id @default(uuid(7))
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId String @map("property_id")
+  checkIn DateTime
+  checkOut DateTime
+  guestsCount Int @map("guests_count")
+  status PropertyBookingStatus
+  paymentStatus PropertyBookingPaymentStatus @map("payment_status")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("property_bookings")
+}
+
+model Country {
+  id String @id @default(uuid(7))
+  name String
+
+  properties Property[]
+  users User[]
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum PropertyStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum PropertyBookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PropertyBookingPaymentStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
