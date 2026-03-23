@@ -17,8 +17,8 @@ model User {
   fullName String @db.VarChar(100) @map("full_name")
   email String @unique @db.VarChar(100)
   phone String? @db.VarChar(100)
-  country Country @relation(fields: [countryId], references: [id])
-  countryId String
+  country Country @relation(fields: [countryCode], references: [code])
+  countryCode String @db.VarChar(2) @map("country_code")
   role UserRole @default(USER)
   deletedAt DateTime? @map("deleted_at")
 
@@ -43,8 +43,8 @@ model Property {
   description String?
   // cents
   price Int
-  country Country @relation(fields: [countryId], references: [id])
-  countryId String
+  country Country @relation(fields: [countryCode], references: [code])
+  countryCode String @db.VarChar(2) @map("country_code")
   city String @db.VarChar(100)
   address String @db.VarChar(100)
   mainImage String @db.VarChar(100) @map("main_image")
@@ -75,8 +75,8 @@ model PropertyBooking {
 }
 
 model Country {
-  id String @id @default(uuid(7))
-  name String
+  code String @id @db.VarChar(2)
+  name String @db.VarChar(100)
 
   properties Property[]
   users User[]
