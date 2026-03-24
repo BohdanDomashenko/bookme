@@ -1,10 +1,10 @@
 // packages/contracts/tsconfig.json
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES2023",
     "module": "node16",
     "moduleResolution": "node16",
-    "lib": ["ES2022"],
+    "lib": ["ES2023"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,

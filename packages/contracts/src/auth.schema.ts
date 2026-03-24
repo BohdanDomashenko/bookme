@@ -12,7 +12,7 @@ export const otpVerifySchema = z.object({
 export const signUpSchema = z.object({
   email: z.string().email(),
   full_name: z.string().max(100),
-  country_id: z.string(),
+  country_code: z.string(),
   city: z.string().max(100),
 });
 
