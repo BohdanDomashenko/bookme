@@ -6,6 +6,11 @@
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
+
+    // Optional Prisma Client Generator configuration
+  runtime                = "nodejs" // <-- Important part 2
+  moduleFormat           = "cjs"
+  generatedFileExtension = "ts" // <-- Important part 3
 }
 
 datasource db {
@@ -34,6 +39,10 @@ model UserOTP {
   code String @db.VarChar(6)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id") @unique()
+  expiresAt DateTime @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
 }
 
 model Property {

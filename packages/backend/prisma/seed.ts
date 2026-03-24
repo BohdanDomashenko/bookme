@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { PrismaClient } from '../generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { seedCountries } from './seeds/countries.seed';
+import { seedProperties } from './seeds/properties.seed';
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -14,6 +15,7 @@ const prismaClient = new PrismaClient({ adapter });
 
 async function main() {
   await seedCountries(prismaClient);
+  //await seedProperties(prismaClient);
 }
 
 main()
