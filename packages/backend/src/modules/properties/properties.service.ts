@@ -6,45 +6,58 @@ import {
   PropertyBookingStatus,
   PropertyStatus,
 } from 'generated/prisma/enums';
+import {
+  formatPrismaPagination,
+  getPaginated,
+  getPaginationQuery,
+} from 'src/common/utils/pagination.utils';
 
 @Injectable()
 export class PropertiesService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findMany(findAllDto: PropertiesFilterDto) {
+  async findMany(dto: PropertiesFilterDto) {
+    const [pagination, query] = getPaginationQuery(dto);
+
     const {
       city,
       country_code: countryCode,
       price_range: priceRange = [],
       date_range: dateRange = [],
-    } = findAllDto;
+    } = query;
 
     const [priceMin, priceMax] = priceRange;
     const [startDate, endDate] = dateRange;
 
-    const propetries = await this.prismaService.property.findMany({
-      where: {
-        status: PropertyStatus.ACTIVE,
-        ...(city && { city }),
-        ...(countryCode && { country: countryCode }),
-        ...(priceRange && {
-          price: {
-            gte: priceMin,
-            lte: priceMax,
+    const where = {
+      status: PropertyStatus.ACTIVE,
+      ...(city && { city }),
+      ...(countryCode && { countryCode: countryCode }),
+      ...(priceRange && {
+        price: {
+          gte: priceMin,
+          lte: priceMax,
+        },
+      }),
+      ...(dateRange && {
+        bookings: {
+          none: {
+            paymentStatus: PropertyBookingPaymentStatus.PAID,
+            checkIn: { gt: startDate },
+            checkOut: { lt: endDate },
           },
-        }),
-        ...(dateRange && {
-          bookings: {
-            none: {
-              paymentStatus: PropertyBookingPaymentStatus.PAID,
-              checkIn: { gt: startDate },
-              checkOut: { lt: endDate },
-            },
-          },
-        }),
-      },
-    });
+        },
+      }),
+    };
 
-    return propetries;
+    const [propetries, total] = await Promise.all([
+      this.prismaService.property.findMany({
+        where,
+        ...formatPrismaPagination(pagination.page, pagination.limit),
+      }),
+      this.prismaService.property.count({ where }),
+    ]);
+
+    return getPaginated(propetries, pagination.limit, total);
   }
 }

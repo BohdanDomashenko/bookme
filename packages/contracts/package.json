@@ -5,6 +5,7 @@
   "types": "dist/index.d.ts",
   "private": true,
   "dependencies": {
+    "date-fns": "^4.1.0",
     "zod": "^3.25.1"
   },
   "scripts": {
