@@ -1,17 +1,17 @@
-import z from 'zod';
 import type { Paginated, PaginationQuery } from '@packages/contracts';
 
-export function getPaginated<T extends z.ZodTypeAny>(
-  data: T[],
-  page: number,
-  limit: number,
-): Paginated<T> {
-  const total = data.length;
+export function getPaginated<T>(payload: {
+  data: T[];
+  page: number;
+  total: number;
+  limit: number;
+}): Paginated<T> {
+  const { data, page, total, limit } = payload;
+
   const pages = Math.ceil(total / limit);
-  const paginatedData = data.slice((page - 1) * limit, page * limit);
 
   return {
-    data: paginatedData,
+    data,
     pagination: {
       page,
       total,

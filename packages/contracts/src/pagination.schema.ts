@@ -7,8 +7,8 @@ export const paginationSchema = z.object({
 });
 
 export const paginationQuerySchema = z.object({
-  page: z.number(),
-  limit: z.number().max(100).optional().default(10),
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(10),
 });
 
 export const paginatedSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
@@ -18,7 +18,15 @@ export const paginatedSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
   });
 
 export type Pagination = z.infer<typeof paginationSchema>;
-export type Paginated<T extends z.ZodTypeAny> = z.infer<
-  ReturnType<typeof paginatedSchema<T>>
->;
-export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
+export type Paginated<T> = {
+  data: T[];
+  pagination: Pagination;
+};
+export type PaginationQuery<T = unknown> = z.infer<
+  typeof paginationQuerySchema
+> &
+  T;
+export type PaginationQueryPartial<T = unknown> = Partial<
+  z.infer<typeof paginationQuerySchema>
+> &
+  T;

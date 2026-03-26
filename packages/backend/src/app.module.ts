@@ -7,6 +7,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { PropertiesModule } from './modules/properties/properties.module';
+import { CountriesModule } from './modules/countries/countries.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { PropertiesModule } from './modules/properties/properties.module';
     }),
     AuthModule,
     PropertiesModule,
+    CountriesModule,
   ],
   controllers: [],
   providers: [

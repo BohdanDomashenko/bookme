@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PropertiesFilterDto } from './dto/properties.dto';
 import {
   PropertyBookingPaymentStatus,
-  PropertyBookingStatus,
   PropertyStatus,
 } from 'generated/prisma/enums';
 import {
@@ -58,6 +57,11 @@ export class PropertiesService {
       this.prismaService.property.count({ where }),
     ]);
 
-    return getPaginated(propetries, pagination.limit, total);
+    return getPaginated({
+      data: propetries,
+      page: pagination.page,
+      total,
+      limit: pagination.limit,
+    });
   }
 }

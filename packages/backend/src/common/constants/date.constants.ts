@@ -1,0 +1,3 @@
+export const SECONDS_IN_MINUTE = 60;
+export const MINUTES_IN_HOUR = 60;
+export const SECONDS_IN_DAY = SECONDS_IN_MINUTE * MINUTES_IN_HOUR * 24;

@@ -3,20 +3,12 @@
 import 'dotenv/config';
 import { defineConfig } from 'prisma/config';
 
-console.log(
-  'process.env.USE_DIRECT_DATABASE_URL',
-  process.env.USE_DIRECT_DATABASE_URL,
-);
-
 export default defineConfig({
   schema: 'prisma/schema.prisma',
   migrations: {
     path: 'prisma/migrations',
-    seed: 'tsx prisma/seed.ts',
   },
   datasource: {
-    url: process.env.USE_DIRECT_DATABASE_URL
-      ? process.env.DIRECT_DATABASE_URL
-      : process.env.DATABASE_URL,
+    url: process.env.DATABASE_URL,
   },
 });
