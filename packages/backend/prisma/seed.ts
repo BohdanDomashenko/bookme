@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import { PrismaClient } from '../generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '../generated/prisma/client.js';
 import { seedCountries } from './seeds/countries.seed';
 import { seedProperties } from './seeds/properties.seed';
 
@@ -15,7 +15,7 @@ const prismaClient = new PrismaClient({ adapter });
 
 async function main() {
   await seedCountries(prismaClient);
-  //await seedProperties(prismaClient);
+  await seedProperties(prismaClient);
 }
 
 main()

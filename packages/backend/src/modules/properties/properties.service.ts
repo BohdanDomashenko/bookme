@@ -1,19 +1,40 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { PropertiesFilterDto } from './dto/properties.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   PropertyBookingPaymentStatus,
   PropertyStatus,
 } from 'generated/prisma/enums';
+import type { PropertyGetPayload } from 'generated/prisma/models';
 import {
   formatPrismaPagination,
   getPaginated,
   getPaginationQuery,
 } from 'src/common/utils/pagination.utils';
+import { PrismaService } from '../prisma/prisma.service';
+import type { PropertiesFilterDto } from './dto/properties.dto';
 
 @Injectable()
 export class PropertiesService {
   constructor(private readonly prismaService: PrismaService) {}
+
+  checkPropertyAvailability<
+    T extends PropertyGetPayload<{
+      include: { bookings: true };
+    }>,
+  >(property: T, checkIn: Date, checkOut: Date): boolean {
+    const hasOverlap = property.bookings.some(
+      (booking) => booking.checkIn < checkOut && booking.checkOut > checkIn,
+    );
+
+    if (
+      property.status !== PropertyStatus.ACTIVE ||
+      property.deletedAt ||
+      hasOverlap
+    ) {
+      return false;
+    }
+
+    return true;
+  }
 
   async findMany(dto: PropertiesFilterDto) {
     const [pagination, query] = getPaginationQuery(dto);

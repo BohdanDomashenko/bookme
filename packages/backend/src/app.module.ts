@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
-import { PropertiesModule } from './modules/properties/properties.module';
 import { CountriesModule } from './modules/countries/countries.module';
+import { PropertiesModule } from './modules/properties/properties.module';
+import { PropertyBookingModule } from './modules/property-booking/property-booking.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CountriesModule } from './modules/countries/countries.module';
     }),
     AuthModule,
     PropertiesModule,
+    PropertyBookingModule,
     CountriesModule,
   ],
   controllers: [],

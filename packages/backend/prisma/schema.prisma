@@ -71,8 +71,8 @@ model PropertyBooking {
   userId String @map("user_id")
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId String @map("property_id")
-  checkIn DateTime
-  checkOut DateTime
+  checkIn DateTime @map("check_in")
+  checkOut DateTime @map("check_out")
   guestsCount Int @map("guests_count")
   status PropertyBookingStatus
   paymentStatus PropertyBookingPaymentStatus @map("payment_status")
