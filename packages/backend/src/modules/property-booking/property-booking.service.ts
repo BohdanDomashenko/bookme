@@ -3,32 +3,29 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
+import { addMinutes } from 'date-fns';
 import {
   PropertyBookingPaymentStatus,
   PropertyBookingStatus,
   PropertyStatus,
 } from 'generated/prisma/enums';
 import { PRISMA_ERROR_CODES } from 'src/common/constants/prisma.constants';
+import { PROPERTY_BOOKING_EXPIRATION_MINUTES } from 'src/common/constants/property-booking.constants';
 // Nest DI needs a value import for reflect-metadata param types.
 // biome-ignore lint/style/useImportType: constructor token for Nest metadata
 import { PrismaService } from '../prisma/prisma.service';
-// biome-ignore lint/style/useImportType: constructor token for Nest metadata
-import { PropertiesService } from '../properties/properties.service';
 import type { CreatePropertyBookingDto } from './dto/booking.dto';
 
 @Injectable()
 export class PropertyBookingService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly propertiesService: PropertiesService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async create(userId: string, dto: CreatePropertyBookingDto) {
+    const now = new Date();
+
     const {
       property_id: propertyId,
-      check_in: checkIn,
-      check_out: checkOut,
+      date_range: [checkIn, checkOut],
       guests_count: guestsCount,
     } = dto;
 
@@ -59,6 +56,7 @@ export class PropertyBookingService {
           guestsCount,
           status: PropertyBookingStatus.PENDING,
           paymentStatus: PropertyBookingPaymentStatus.PENDING,
+          expiresAt: addMinutes(now, PROPERTY_BOOKING_EXPIRATION_MINUTES),
         },
       });
 

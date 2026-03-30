@@ -77,8 +77,11 @@ model PropertyBooking {
   status PropertyBookingStatus
   paymentStatus PropertyBookingPaymentStatus @map("payment_status")
 
+  expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@index([status, expiresAt])
 
   @@map("property_bookings")
 }
@@ -110,5 +113,4 @@ enum PropertyBookingStatus {
 enum PropertyBookingPaymentStatus {
   PENDING
   PAID
-  CANCELLED
 }

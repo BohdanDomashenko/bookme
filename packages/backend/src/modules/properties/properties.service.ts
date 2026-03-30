@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   PropertyBookingPaymentStatus,
+  PropertyBookingStatus,
   PropertyStatus,
 } from 'generated/prisma/enums';
 import type { PropertyGetPayload } from 'generated/prisma/models';
@@ -62,9 +63,11 @@ export class PropertiesService {
       ...(dateRange && {
         bookings: {
           none: {
-            paymentStatus: PropertyBookingPaymentStatus.PAID,
-            checkIn: { gt: startDate },
-            checkOut: { lt: endDate },
+            status: { not: PropertyBookingStatus.REJECTED },
+            AND: [
+              { checkIn: { lt: endDate } },
+              { checkOut: { gt: startDate } },
+            ],
           },
         },
       }),
@@ -74,6 +77,9 @@ export class PropertiesService {
       this.prismaService.property.findMany({
         where,
         ...formatPrismaPagination(pagination.page, pagination.limit),
+        include: {
+          bookings: true,
+        },
       }),
       this.prismaService.property.count({ where }),
     ]);

@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { AuthModule } from './modules/auth/auth.module';
 import { CountriesModule } from './modules/countries/countries.module';
+import { CronModule } from './modules/cron/cron.module';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { PropertyBookingModule } from './modules/property-booking/property-booking.module';
 
@@ -15,6 +16,7 @@ import { PropertyBookingModule } from './modules/property-booking/property-booki
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    CronModule,
     AuthModule,
     PropertiesModule,
     PropertyBookingModule,
