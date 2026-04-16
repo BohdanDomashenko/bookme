@@ -12,6 +12,9 @@ import { addDays, addMinutes } from 'date-fns';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import assert from 'node:assert';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EVENTS } from 'src/common/constants/events.constants';
+import { SignUpSuccessEvent } from './events/sign-up-success.event';
 
 const OTP_LIFETIME_MINUTES = 5;
 
@@ -23,6 +26,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     this.JWT_SECRET = this.configService.get<string>('JWT_SECRET');
 
@@ -41,15 +45,20 @@ export class AuthService {
     }
 
     try {
-      await this.prismaService.user.create({
+      const user = await this.prismaService.user.create({
         data: {
           email: signupDto.email,
           fullName: signupDto.full_name,
           countryCode: country.code,
         },
       });
+
+      const sanitizedUser = sanitizeUser(user);
+
+      this.eventEmitter.emit(EVENTS.AUTH.SIGNUP_SUCCESS, new SignUpSuccessEvent({
+        user: sanitizedUser,
+      }));
     } catch (error) {
-      console.log('eddokwkeod', error?.constructor?.name);
       if (error instanceof PrismaClientKnownRequestError) {
         console.log('PrismaClientKnownRequestError', JSON.stringify(error));
         if (error.code === PRISMA_ERROR_CODES.UNIQUE_CONSTRAINT_FAILED) {
