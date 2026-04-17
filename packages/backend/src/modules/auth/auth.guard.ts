@@ -1,13 +1,11 @@
-import assert from 'node:assert';
 import {
   type CanActivate,
   type ExecutionContext,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-// biome-ignore lint/style/useImportType: value import required for Nest DI / emitDecoratorMetadata
 import { JwtService } from '@nestjs/jwt';
+import { EnvService } from '../env/env.service';
 import type { JwtAccessPayload, RequestWithJwtUser } from './jwt-payload';
 
 @Injectable()
@@ -15,12 +13,10 @@ export class AuthGuard implements CanActivate {
   private readonly _JWT_SECRET: string;
 
   constructor(
-    private readonly configService: ConfigService,
+    private readonly envService: EnvService,
     private jwtService: JwtService,
   ) {
-    const JWT_SECRET = this.configService.get<string>('JWT_SECRET');
-    assert(JWT_SECRET, 'JWT_SECRET is not defined');
-    this._JWT_SECRET = JWT_SECRET;
+    this._JWT_SECRET = this.envService.get('JWT_SECRET');
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

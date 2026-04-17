@@ -1,11 +1,21 @@
-import nodemailer from "nodemailer";
-import type { Transporter } from "nodemailer";
-import { EmailPayload, EmailService } from "../email.interface";
+import { Inject } from '@nestjs/common';
+import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
+import { EmailPayload, EmailService } from '../email.interface';
 
+export const SMTP_CONFIG = 'SMTP_CONFIG';
 export class SmtpProvider implements EmailService {
   transporter: Transporter;
 
-  constructor() {
+  constructor(
+    /*     @Inject(SMTP_CONFIG)
+    private readonly config: {
+      host: string;
+      port: number;
+      user: string;
+      password: string;
+    }, */
+  ) {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT),
@@ -27,5 +37,4 @@ export class SmtpProvider implements EmailService {
       html,
     });
   }
-
 }

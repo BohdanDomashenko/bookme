@@ -63,6 +63,8 @@ model Property {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@index([status, countryCode, city, price])
 }
 
 model PropertyBooking {
@@ -81,7 +83,7 @@ model PropertyBooking {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
-  @@index([status, expiresAt])
+  @@index([propertyId, checkIn, checkOut])
 
   @@map("property_bookings")
 }

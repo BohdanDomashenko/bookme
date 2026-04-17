@@ -47,7 +47,7 @@
         "useBlockStatements": "error",
         "useConsistentArrayType": "error",
         "useForOf": "error",
-        "useImportType": "error",
+        "useImportType": "off",
         "useShorthandFunctionType": "error"
       },
       "suspicious": {

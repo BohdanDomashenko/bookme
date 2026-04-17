@@ -1,30 +1,28 @@
+import KeyvRedis from '@keyv/redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import KeyvRedis from '@keyv/redis';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { AuthModule } from './modules/auth/auth.module';
 import { CountriesModule } from './modules/countries/countries.module';
 import { CronModule } from './modules/cron/cron.module';
+import { EmailModule } from './modules/email/email.module';
+import { EnvModule } from './modules/env/env.module';
+import { EnvService } from './modules/env/env.service';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { PropertyBookingModule } from './modules/property-booking/property-booking.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
     CacheModule.registerAsync({
+      imports: [EnvModule],
       isGlobal: true,
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const redisUrl = configService.get<string>('REDIS_URL');
+      inject: [EnvService],
+      useFactory: (envService: EnvService) => {
+        const redisUrl = envService.get('REDIS_URL');
 
         return {
           stores: redisUrl ? [new KeyvRedis(redisUrl)] : undefined,
@@ -37,6 +35,8 @@ import { PropertyBookingModule } from './modules/property-booking/property-booki
     PropertiesModule,
     PropertyBookingModule,
     CountriesModule,
+    EmailModule,
+    EnvModule,
   ],
   controllers: [],
   providers: [
@@ -55,4 +55,4 @@ import { PropertyBookingModule } from './modules/property-booking/property-booki
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}
