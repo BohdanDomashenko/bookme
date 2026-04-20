@@ -22,4 +22,19 @@ export class AppEmailService {
       html: `<p>Welcome to our platform, ${fullName}</p>`,
     });
   }
+
+  async sendOtpLoginEmail(data: {
+    email: string;
+    fullName: string;
+    otp: string;
+  }) {
+    const { email, fullName, otp } = data;
+
+    await this.emailService.send({
+      to: email,
+      subject: 'OTP Login Request',
+      text: `Your OTP for login is ${otp} for ${fullName}`,
+      html: `<p>Your OTP for login is ${otp} for ${fullName}</p>`,
+    });
+  }
 }

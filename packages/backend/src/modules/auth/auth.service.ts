@@ -1,36 +1,36 @@
+import { randomInt } from 'node:crypto';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import type { OtpLoginDto, OtpVerifyDto, SignupDto } from './dto/auth.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { JwtService } from '@nestjs/jwt';
+import { addMinutes } from 'date-fns';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
+import { EVENTS } from 'src/common/constants/events.constants';
 import { PRISMA_ERROR_CODES } from 'src/common/constants/prisma.constants';
 import { sanitizeUser } from 'src/common/utils/user.utils';
-import { addDays, addMinutes } from 'date-fns';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import assert from 'node:assert';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EVENTS } from 'src/common/constants/events.constants';
+import { EnvService } from '../env/env.service';
+import { PrismaService } from '../prisma/prisma.service';
+import type { OtpLoginDto, OtpVerifyDto, SignupDto } from './dto/auth.dto';
+import { OtpLoginRequestEvent } from './events/otp-login-request.event';
 import { SignUpSuccessEvent } from './events/sign-up-success.event';
 
 const OTP_LIFETIME_MINUTES = 5;
+const OTP_LENGTH = 4;
 
 @Injectable()
 export class AuthService {
   JWT_SECRET?: string;
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
-    private readonly jwtService: JwtService,
+    private readonly envService: EnvService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly jwtService: JwtService,
   ) {
-    this.JWT_SECRET = this.configService.get<string>('JWT_SECRET');
-
-    assert(this.JWT_SECRET, 'JWT_SECRET is not defined');
+    this.JWT_SECRET = this.envService.get('JWT_SECRET');
   }
 
   async signup(signupDto: SignupDto) {
@@ -55,9 +55,12 @@ export class AuthService {
 
       const sanitizedUser = sanitizeUser(user);
 
-      this.eventEmitter.emit(EVENTS.AUTH.SIGNUP_SUCCESS, new SignUpSuccessEvent({
-        user: sanitizedUser,
-      }));
+      this.eventEmitter.emit(
+        EVENTS.AUTH.SIGNUP_SUCCESS,
+        new SignUpSuccessEvent({
+          user: sanitizedUser,
+        }),
+      );
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         console.log('PrismaClientKnownRequestError', JSON.stringify(error));
@@ -89,15 +92,23 @@ export class AuthService {
       },
     });
 
+    const otp = this.generateOtp();
+
     await this.prismaService.userOTP.create({
       data: {
-        code: this.generateOtp(),
+        code: otp,
         userId: user.id,
         expiresAt: addMinutes(now, OTP_LIFETIME_MINUTES),
       },
     });
 
-    // @todo: Send OTP email to the user
+    this.eventEmitter.emit(
+      EVENTS.AUTH.OTP_LOGIN_REQUEST,
+      new OtpLoginRequestEvent({
+        user: sanitizeUser(user),
+        otp,
+      }),
+    );
   }
 
   async verifyOtp(otpLoginDto: OtpVerifyDto) {
@@ -140,7 +151,8 @@ export class AuthService {
   }
 
   private generateOtp() {
-    // @TODO: Generate a random OTP
-    return '1111';
+    return Array.from({ length: OTP_LENGTH })
+      .map(() => randomInt(0, 9))
+      .join('');
   }
 }

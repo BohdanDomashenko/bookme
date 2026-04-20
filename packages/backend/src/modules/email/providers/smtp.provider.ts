@@ -4,24 +4,28 @@ import type { Transporter } from 'nodemailer';
 import { EmailPayload, EmailService } from '../email.interface';
 
 export const SMTP_CONFIG = 'SMTP_CONFIG';
+
+export interface SmtpConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  password: string;
+}
 export class SmtpProvider implements EmailService {
   transporter: Transporter;
 
   constructor(
-    /*     @Inject(SMTP_CONFIG)
-    private readonly config: {
-      host: string;
-      port: number;
-      user: string;
-      password: string;
-    }, */
+    @Inject(SMTP_CONFIG)
+    private readonly config: SmtpConfig,
   ) {
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
+      host: config.host,
+      port: config.port,
+      secure: config.secure,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
+        user: config.user,
+        pass: config.password,
       },
     });
   }

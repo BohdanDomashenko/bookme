@@ -1,10 +1,15 @@
 import KeyvRedis from '@keyv/redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { AppService } from './app.service';
+import {
+  APP_THROTTLE_LIMIT,
+  APP_THROTTLE_TTL,
+} from './common/constants/app.constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { AuthModule } from './modules/auth/auth.module';
 import { CountriesModule } from './modules/countries/countries.module';
@@ -17,6 +22,14 @@ import { PropertyBookingModule } from './modules/property-booking/property-booki
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: APP_THROTTLE_TTL,
+          limit: APP_THROTTLE_LIMIT,
+        },
+      ],
+    }),
     CacheModule.registerAsync({
       imports: [EnvModule],
       isGlobal: true,
@@ -52,6 +65,10 @@ import { PropertyBookingModule } from './modules/property-booking/property-booki
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })
