@@ -96,6 +96,19 @@ model Country {
   users User[]
 }
 
+model StripeWebhookEvent {
+  id           String   @id @default(uuid(7))
+  eventId      String   @unique @map("event_id") // Stripe event.id (global dedupe)
+  type         String
+  accountId    String?  @map("account_id")
+  payload      Json
+  status       String   @default("pending") // pending | processing | processed | failed
+  attempts     Int      @default(0)
+  lastError    String? @map("last_error")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+}
+
 enum UserRole {
   ADMIN
   USER

@@ -3,7 +3,7 @@ import { EnvModule } from '../env/env.module';
 import { EnvService } from '../env/env.service';
 import { EMAIL_SERVICE } from './email.interface';
 import { AppEmailService } from './email.service';
-import { OtpLoginRequestListener } from './listeners/otp-login-request.listener';
+import { OtpLoginEmailListener } from './listeners/otp-login-email.listener';
 import { WelcomeUserEmailListener } from './listeners/welcome-email.listener';
 import { SMTP_CONFIG, SmtpProvider } from './providers/smtp.provider';
 
@@ -29,7 +29,7 @@ import { SMTP_CONFIG, SmtpProvider } from './providers/smtp.provider';
     },
     AppEmailService,
     WelcomeUserEmailListener,
-    OtpLoginRequestListener,
+    OtpLoginEmailListener,
   ],
   exports: [AppEmailService],
 })

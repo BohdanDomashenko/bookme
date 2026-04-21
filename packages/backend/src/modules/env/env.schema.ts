@@ -23,6 +23,8 @@ export const envSchema = z.object({
   SMTP_USER: z.string(),
   SMTP_PASSWORD: z.string(),
   REDIS_URL: z.string(),
+  STRIPE_SECRET_KEY: z.string(),
+  STRIPE_WEBHOOK_SECRET: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof envSchema>;

@@ -5,7 +5,7 @@ import { OtpLoginRequestEvent } from 'src/modules/auth/events/otp-login-request.
 import { AppEmailService } from '../email.service';
 
 @Injectable()
-export class OtpLoginRequestListener {
+export class OtpLoginEmailListener {
   constructor(private readonly emailService: AppEmailService) {}
 
   @OnEvent(EVENTS.AUTH.OTP_LOGIN_REQUEST)

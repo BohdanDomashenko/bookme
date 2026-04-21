@@ -1,4 +1,5 @@
 import KeyvRedis from '@keyv/redis';
+import { BullModule } from '@nestjs/bullmq';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -19,6 +20,7 @@ import { EnvModule } from './modules/env/env.module';
 import { EnvService } from './modules/env/env.service';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { PropertyBookingModule } from './modules/property-booking/property-booking.module';
+import { StripeWebhookModule } from './modules/stripe-webhook/stripe-webhook.module';
 
 @Module({
   imports: [
@@ -42,11 +44,21 @@ import { PropertyBookingModule } from './modules/property-booking/property-booki
         };
       },
     }),
+    BullModule.forRootAsync({
+      imports: [EnvModule],
+      inject: [EnvService],
+      useFactory: (envService: EnvService) => ({
+        connection: {
+          url: envService.get('REDIS_URL'),
+        },
+      }),
+    }),
     EventEmitterModule.forRoot(),
     CronModule,
     AuthModule,
     PropertiesModule,
     PropertyBookingModule,
+    StripeWebhookModule,
     CountriesModule,
     EmailModule,
     EnvModule,

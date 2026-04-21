@@ -1,12 +1,14 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import * as qs from 'qs';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
+import * as qs from 'qs';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
 
   app.enableCors();
   app.set('query parser', (str: string) => qs.parse(str));
