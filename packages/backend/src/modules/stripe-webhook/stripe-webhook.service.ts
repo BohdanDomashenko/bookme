@@ -1,9 +1,9 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import { Prisma } from 'generated/prisma/client';
 import { PrismaClientKnownRequestError } from 'generated/prisma/internal/prismaNamespace';
 import { PRISMA_ERROR_CODES } from 'src/common/constants/prisma.constants';
+import { isPrismaInputJsonValue } from 'src/common/utils/json.utils';
 import Stripe from 'stripe';
 import { EnvService } from '../env/env.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -17,42 +17,6 @@ import {
 
 type StripeClient = InstanceType<typeof Stripe>;
 type StripeEvent = ReturnType<StripeClient['webhooks']['constructEvent']>;
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const prototype = Object.getPrototypeOf(value);
-  return prototype === Object.prototype || prototype === null;
-}
-
-function isPrismaInputJsonValue(
-  value: unknown,
-): value is Prisma.InputJsonValue {
-  if (value === null) {
-    return true;
-  }
-
-  const valueType = typeof value;
-  if (
-    valueType === 'string' ||
-    valueType === 'boolean' ||
-    (valueType === 'number' && Number.isFinite(value))
-  ) {
-    return true;
-  }
-
-  if (Array.isArray(value)) {
-    return value.every((item) => isPrismaInputJsonValue(item));
-  }
-
-  if (isPlainObject(value)) {
-    return Object.values(value).every((item) => isPrismaInputJsonValue(item));
-  }
-
-  return false;
-}
 
 @Injectable()
 export class StripeWebhookService {
@@ -81,7 +45,7 @@ export class StripeWebhookService {
     }
 
     const accountId = typeof event.account === 'string' ? event.account : null;
-    const payload = event as unknown;
+    const payload = event;
 
     if (!isPrismaInputJsonValue(payload)) {
       throw new BadRequestException(
