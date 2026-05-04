@@ -7,6 +7,7 @@ import { isPrismaInputJsonValue } from 'src/common/utils/json.utils';
 import Stripe from 'stripe';
 import { EnvService } from '../env/env.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { StripeEventHandlerRegistry } from './events/stripe-event-handler.registry';
 import {
   STRIPE_WEBHOOK_ATTEMPTS,
   STRIPE_WEBHOOK_BACKOFF_DELAY,
@@ -26,6 +27,7 @@ export class StripeWebhookService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly envService: EnvService,
+    private readonly stripeEventHandlerRegistry: StripeEventHandlerRegistry,
     @InjectQueue(STRIPE_WEBHOOK_QUEUE_NAME) private readonly queue: Queue,
   ) {
     this.stripeClient = new Stripe(this.envService.get('STRIPE_SECRET_KEY'));
@@ -44,7 +46,6 @@ export class StripeWebhookService {
       throw new BadRequestException('Invalid Stripe signature');
     }
 
-    const accountId = typeof event.account === 'string' ? event.account : null;
     const payload = event;
 
     if (!isPrismaInputJsonValue(payload)) {
@@ -58,7 +59,6 @@ export class StripeWebhookService {
         data: {
           eventId: event.id,
           type: event.type,
-          accountId,
           payload,
           status: STRIPE_WEBHOOK_STATUS.PENDING,
         },
@@ -73,20 +73,5 @@ export class StripeWebhookService {
 
       throw error;
     }
-
-    await this.queue.add(
-      STRIPE_WEBHOOK_JOB_NAME,
-      {
-        eventId: event.id,
-      },
-      {
-        attempts: STRIPE_WEBHOOK_ATTEMPTS,
-        backoff: {
-          type: 'exponential',
-          delay: STRIPE_WEBHOOK_BACKOFF_DELAY,
-        },
-        jobId: event.id,
-      },
-    );
   }
 }

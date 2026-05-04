@@ -111,7 +111,7 @@ enum PaymentResourceType {
 model Payment {
   id String @id @default(uuid(7))
   provider PaymentProvider
-  providerPaymentId String @map("provider_payment_id") @db.VarChar(100)
+  providerPaymentId String? @map("provider_payment_id") @db.VarChar(100)
   resourceType PaymentResourceType @map("resource_type")
   resourceId String @map("resource_id") @db.VarChar(100)
   amount Int // cents
